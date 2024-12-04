@@ -2,6 +2,7 @@ import { ExampleButton } from "./_components/ExampleButton";
 import { logout } from "./login/actions";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { auth } from "@trigger.dev/sdk/v3";
 
 export default async function HomePage() {
   const supabase = await createClient();
@@ -12,6 +13,8 @@ export default async function HomePage() {
   if (!session) {
     redirect("/login");
   }
+
+  const triggerToken = await auth.createTriggerPublicToken("sync-example");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -47,7 +50,7 @@ export default async function HomePage() {
                     account
                   </p>
                 </div>
-                <ExampleButton />
+                <ExampleButton token={triggerToken} />
               </div>
             </div>
           </div>

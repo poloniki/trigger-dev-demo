@@ -6,28 +6,17 @@ import {
   PauseCircle,
   XCircle,
 } from "lucide-react";
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
-import { useEffect } from "react";
 
-export default function ExampleLoadingState({
-  id,
-  publicAccessToken,
-  onComplete,
+export function RunStatusDisplay({
+  run,
+  error,
 }: {
-  id: string;
-  publicAccessToken: string;
-  onComplete: () => void;
+  run: {
+    status: string;
+    metadata?: { total_items?: number };
+  };
+  error?: Error;
 }) {
-  const { run, error } = useRealtimeRun(id, {
-    accessToken: publicAccessToken,
-  });
-
-  useEffect(() => {
-    if (run?.status === "COMPLETED") {
-      onComplete();
-    }
-  }, [run?.status, onComplete]);
-
   if (error) {
     return (
       <div className="flex items-center gap-2 text-red-700">
@@ -37,16 +26,6 @@ export default function ExampleLoadingState({
     );
   }
 
-  if (!run) {
-    return (
-      <div className="flex items-center gap-2 text-gray-600">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm">Loading...</span>
-      </div>
-    );
-  }
-
-  // Success state
   if (run.status === "COMPLETED") {
     return (
       <div className="flex items-center gap-2 text-green-900 text-bold">
@@ -80,6 +59,24 @@ export default function ExampleLoadingState({
     );
   }
 
+  if (
+    [
+      "FAILED",
+      "CRASHED",
+      "SYSTEM_FAILURE",
+      "EXPIRED",
+      "TIMED_OUT",
+      "CANCELED",
+    ].includes(run.status)
+  ) {
+    return (
+      <div className="flex items-center gap-2 text-red-700">
+        <XCircle className="h-4 w-4" />
+        <span className="text-sm">Sync failed</span>
+      </div>
+    );
+  }
+
   // Paused states
   if (["FROZEN", "INTERRUPTED"].includes(run.status)) {
     return (
@@ -90,31 +87,6 @@ export default function ExampleLoadingState({
     );
   }
 
-  // Error states
-  if (
-    ["FAILED", "CRASHED", "SYSTEM_FAILURE", "EXPIRED", "TIMED_OUT"].includes(
-      run.status
-    )
-  ) {
-    return (
-      <div className="flex items-center gap-2 text-red-700">
-        <XCircle className="h-4 w-4" />
-        <span className="text-sm">Sync failed</span>
-      </div>
-    );
-  }
-
-  // Canceled state
-  if (run.status === "CANCELED") {
-    return (
-      <div className="flex items-center gap-2 text-gray-700">
-        <XCircle className="h-4 w-4" />
-        <span className="text-sm">Sync canceled</span>
-      </div>
-    );
-  }
-
-  // Fallback for any unhandled states
   return (
     <div className="flex items-center gap-2 text-gray-600">
       <Loader2 className="h-4 w-4 animate-spin" />
