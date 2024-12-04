@@ -17,4 +17,3 @@ TO public
 USING (
   (auth.uid() = user_id)
 );
-```sql
